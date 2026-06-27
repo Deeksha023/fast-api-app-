@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String,Enum,ForeignKey
 from sqlalchemy.orm import relationship
-from database import Base
+from models.company import Company
+from database import Base,engine,SessionLocal
 
 
 class Job(Base):

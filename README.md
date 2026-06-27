@@ -49,6 +49,28 @@
 default eg:-timestamp:func.now()
 
 
+# modules
+-sqlalchemy--orm(object relational mapping)
+-fastapi--web framework
+-uvicorn--server for running fastapi 
+application--> `uvicorn app.main:app --relaod`
+psycopg2--postgresql driver
+pydantic --data validation
+-typing-extension--type hints
 
+# concepts
+-ORM
+object relational mapping-->to convert to the python code to the sql code without writing the sql commands
 
+-Depends
+Dependency Injection--->to inject dependencies to route handlers
+
+-Sessionmaker
+To create a session with database
+
+-SessionLocal
+To craete a session with the database for a single request
+
+-declarative_base
+To createbase class for all the models
 
