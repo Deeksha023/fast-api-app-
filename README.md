@@ -28,3 +28,27 @@
 -service--business logic
 -Repository--data access layer
 -Middleware--requesting processing pipeline
+
+# database
+## relatinal database
+--mysql
+--postdresql
+-sql
+-sqlite
+## non-relational database
+-dynamodb
+-redis
+-mongodb
+
+# constraints in database
+-primary key--eg:student_id
+-foreign key--eg:department_id in student table
+-unique --eg:email,phonenumber
+-not null --eg:name
+-check --eg:salary>0
+default eg:-timestamp:func.now()
+
+
+
+
+
