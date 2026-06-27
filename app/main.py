@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 
-from routers import company, job
 from database import Base, engine
+
+# Import models before create_all()
+from models.company import Company
+from models.job import Job
+
+from routers import company, job
 
 app = FastAPI()
 

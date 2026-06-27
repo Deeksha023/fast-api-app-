@@ -6,7 +6,6 @@ from database import get_db
 
 router = APIRouter(prefix="/company", tags=["company"])
 
-company = []
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)
 def create_company(company_create: CompanyCreate, db: Session = Depends(get_db)):
@@ -16,13 +15,16 @@ def create_company(company_create: CompanyCreate, db: Session = Depends(get_db))
     db.refresh(db_company)
     return db_company
 
+
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[CompanyResponse])
-def get_all_company():
-    return company
+def get_all_company(db: Session = Depends(get_db)):
+    return db.query(Company).all()
+
 
 @router.get("/{company_id}", status_code=status.HTTP_200_OK, response_model=CompanyResponse)
-def get_company(company_id: int):
-    return company[company_id]
+def get_company(company_id: int, db: Session = Depends(get_db)):
+    return db.query(Company).filter(Company.id == company_id).first()
+
 
 # @router.get("/")
 # def read_company():
@@ -32,12 +34,12 @@ def get_company(company_id: int):
 # def read_company(company_id: int):
 #     return {"company_id": company_id}
 
+
 @router.put("/{company_id}", status_code=status.HTTP_201_CREATED)
 def update_company(company_id: int, company_update: CompanyUpdate):
-    company[company_id] = company_update
-    return company
+    pass
+
 
 @router.delete("/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_company(company_id: int):
-    company.pop(company_id)
-    return company
+    pass
