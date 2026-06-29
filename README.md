@@ -74,3 +74,9 @@ To craete a session with the database for a single request
 -declarative_base
 To createbase class for all the models
 
+# Alembic
+Alembic--modify tables
+
+pip install alembic
+alembic init alembic
+
