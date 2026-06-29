@@ -7,21 +7,33 @@ from database import get_db
 router = APIRouter(prefix="/job", tags=["job"])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=JobResponse)
-def create_job(job_create: JobCreate, db: Session = Depends(get_db)):
-    db_job = Job(**job_create.dict())
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=JobResponse
+)
+def create_job(job: JobCreate, db: Session = Depends(get_db)):
+    db_job = Job(**job.dict())
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
     return db_job
 
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=list[JobResponse])
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=list[JobResponse]
+)
 def get_all_job(db: Session = Depends(get_db)):
     return db.query(Job).all()
 
 
-@router.get("/{job_id}", status_code=status.HTTP_200_OK, response_model=JobResponse)
+@router.get(
+    "/{job_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=JobResponse
+)
 def get_job(job_id: int, db: Session = Depends(get_db)):
 
     job = db.query(Job).filter(Job.id == job_id).first()
@@ -44,7 +56,11 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
 #     return {"job_id": job_id}
 
 
-@router.put("/{job_id}", status_code=status.HTTP_200_OK, response_model=JobResponse)
+@router.put(
+    "/{job_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=JobResponse
+)
 def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db)):
 
     job = db.query(Job).filter(Job.id == job_id).first()
@@ -55,7 +71,7 @@ def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db)
             detail="Job not found"
         )
 
-    for key, value in job_update.dict().items():
+    for key, value in job_update.dict(exclude_unset=True).items():
         setattr(job, key, value)
 
     db.commit()
@@ -64,7 +80,10 @@ def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db)
     return job
 
 
-@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{job_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 def delete_job(job_id: int, db: Session = Depends(get_db)):
 
     db_job = db.query(Job).filter(Job.id == job_id).first()
