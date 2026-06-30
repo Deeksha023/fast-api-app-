@@ -8,22 +8,19 @@ import { getCompanies } from "./Services/CompanyService";
 import type { Company } from "./types/company";
 
 function App() {
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
 
   async function fetchCompanies() {
-
     setLoading(true);
 
     try {
-      const companies = await getCompanies();
-      setCompanies(companies);
-
-    } catch (err) {
-      setError(err as Error);
-
+      const companiesData = await getCompanies();
+      setCompanies(companiesData);
+      setError(null);
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to load companies");
     } finally {
       setLoading(false);
     }
@@ -38,7 +35,7 @@ function App() {
       <NavBar />
       <Welcome />
       <br />
-      <CompanyCard key={companies.id} companies={companies} />
+      <CompanyCard companies={companies} loading={loading} error={error} />
       <JobCard />
       <Footer />
     </>
