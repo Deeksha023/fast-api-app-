@@ -1,38 +1,38 @@
 import type { Company } from "../types/company";
 
-interface CompanyCardProps {
-  companies: Company[];
-  loading: boolean;
-  error: string | null;
+type Props = {
+    companies: Company[];
 }
 
-function CompanyCard({ companies, loading, error }: CompanyCardProps) {
-  if (loading) {
-    return <div>Loading companies...</div>;
-  }
+function CompanyCard({ companies }: Props) {
+    // const[companies,setCompanies]=useState<Company[]>(companies);
+    // async function fetchCompanies(){
+    //     const companies=await getCompanies();
+    //     setCompanies(companies);
+    // }
+    // useEffect(() => {
+    //     fetchCompanies();
+    // }, []);
 
-  if (error) {
-    return <div>Error loading companies: {error}</div>;
-  }
+    return (
+        <div>
+            <h2>Companies</h2>
 
-  return (
-    <div>
-      <h2>Companies</h2>
-      {companies.length === 0 ? (
-        <p>No companies found.</p>
-      ) : (
-        companies.map((company) => (
-          <div key={company.id}>
-            <h1>{company.name}</h1>
-            <p>Email: {company.email}</p>
-            <p>Phone: {company.phone}</p>
-            <p>Location: {company.location}</p>
-            <hr />
-          </div>
-        ))
-      )}
-    </div>
-  );
+            {companies.length === 0 ? (
+                <p>No companies found.</p>
+            ) : (
+                companies.map((company) => (
+                    <div key={company.id}>
+                        <h1>{company.name}</h1>
+                        <p>Email: {company.email}</p>
+                        <p>Phone: {company.phone}</p>
+                        <p>Location: {company.location}</p>
+                        <hr />
+                    </div>
+                ))
+            )}
+        </div>
+    );
 }
 
 export default CompanyCard;
