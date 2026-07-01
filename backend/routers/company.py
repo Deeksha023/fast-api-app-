@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse
 from models.company import Company
+from routers.auth import get_current_user
 from sqlalchemy.orm import Session
 from database import get_db
 
-router = APIRouter(prefix="/company", tags=["company"])
+router = APIRouter(prefix="/company", tags=["company"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)

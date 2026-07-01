@@ -1,20 +1,27 @@
 from fastapi import FastAPI
-
+from routers import company, job, auth
 from database import Base, engine
-
-# Import models before create_all()
-from models.company import Company
-from models.job import Job
-
-from routers import company, job
+import models.company
+import models.job
+import models.Users
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Create database tables
 Base.metadata.create_all(bind=engine)
 
-print(engine)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+
+# Base.metadata.create_all(bind=engine)
+
+app.include_router(auth.router)
 app.include_router(company.router)
 app.include_router(job.router)
 

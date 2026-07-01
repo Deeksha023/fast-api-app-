@@ -75,8 +75,50 @@ To craete a session with the database for a single request
 To createbase class for all the models
 
 # Alembic
-Alembic--modify tables
-
 pip install alembic
+
 alembic init alembic
 
+alembic -> env.py -> from imported model -> metadata data
+
+alembic.ini -> sqlalchemy.url to postgresql database url
+
+postgresql://user:password@host:port/database_name
+
+alembic revision --autogenerate -m "initial migration"
+
+alembic upgrade head
+
+
+npm install vite@latest
+npm create vite@latest talentspark
+cd talentspark/
+npm run dev
+
+
+# npm
+1  npm install vite@latest
+2  npm create vite@latest talentspark
+3  cd talentspark/
+4  npm run dev
+5  javascript -> ES6 -> arrow functions, rest and spread,
+   template literals, destructuring, promises, async/await
+6  dom-> document object manipulation
+7  vitual dom-> react virtual dom->copy of original dom
+   which will update react dom and then updated dom will
+   be updated in real dom
+8  components-which are different sections of the web page
+
+
+npm install axios
+uvi->axios->localhost:8000(api call)
+(python)->db->useeffect->setstate->render->ui
+
+
+useEffect - which is used to call the api or which is used to fetch the data from the api automatically when the page is loaded
+
+useState - which is used to store the data in the component and which will update the component when the data is updated or changed        
+
+promise--handles asyn operations
+
+asyncronise- handles multiple request
