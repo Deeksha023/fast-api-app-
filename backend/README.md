@@ -122,3 +122,20 @@ useState - which is used to store the data in the component and which will updat
 promise--handles asyn operations
 
 asyncronise- handles multiple request
+
+
+
+## hashing algorithm
+argon2
+bcrypt
+python-jose[cryptography]- used to create jwt tokens
+jwt tokens -> used to authenticate and authorize users
+its in format xxxx.yyyyy.zzzz basically 3 parts
+1.header -> algo + token type:{alg:HS256,typ:JWT}
+2.payload -> data, for eg: {user_id:1,role:admin}
+3.signature -> used to verify the token:{hash(header+payload+secretkey)}
+access token -> used to access protected resourcesrefresh token -> used to refresh access tokenpip install python-multipart
+
+pip install python multipart
+
+

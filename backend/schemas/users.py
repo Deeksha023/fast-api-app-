@@ -8,8 +8,15 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserResponse(UserBase):
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
     id: int
+    name: str
+    email: str
+    role: str
 
     model_config = {
         "from_attributes": True
