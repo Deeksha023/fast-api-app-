@@ -3,9 +3,9 @@ from schemas.job import JobCreate, JobUpdate, JobResponse
 from models.job import Job
 from sqlalchemy.orm import Session
 from database import get_db
+from utils.oauth2 import role_required, get_current_user
 
 router = APIRouter(prefix="/job", tags=["job"])
-
 
 @router.post(
     "/",

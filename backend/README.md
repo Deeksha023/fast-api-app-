@@ -139,3 +139,11 @@ access token -> used to access protected resourcesrefresh token -> used to refre
 pip install python multipart
 
 
+## RBAC
+Role Based access control
+used to give different permissions to different roles
+eg:admin can do anything, user can do only specific things
+-->get_current_user() - for authenticated user
+-->role_required() - for role based access control
+create_access_token() - for creating access token with(secrect_key,algorithm,payload) - token created then verify_access_token() - for decoding acccess token with 
+(secret_key, algorithm,token)-token decoded then

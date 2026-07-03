@@ -1,16 +1,20 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse
 from models.company import Company
-from routers.auth import get_current_user
 from sqlalchemy.orm import Session
-from database import get_db
+from database import get_db, SessionLocal
+from utils.oauth2 import role_required, get_current_user
 
-router = APIRouter(prefix="/company", tags=["company"], dependencies=[Depends(get_current_user)])
+router = APIRouter(prefix="/company", tags=["company"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)
-def create_company(company_create: CompanyCreate, db: Session = Depends(get_db)):
-    db_company = Company(**company_create.dict())
+def create_company(
+    company: CompanyCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
+    db_company = Company(**company.dict())
     db.add(db_company)
     db.commit()
     db.refresh(db_company)
@@ -18,13 +22,20 @@ def create_company(company_create: CompanyCreate, db: Session = Depends(get_db))
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[CompanyResponse])
-def get_all_company(db: Session = Depends(get_db)):
-    return db.query(Company).all()
+def get_all_company(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    companies = db.query(Company).all()
+    return companies
 
 
 @router.get("/{company_id}", status_code=status.HTTP_200_OK, response_model=CompanyResponse)
-def get_company(company_id: int, db: Session = Depends(get_db)):
-
+def get_company(
+    company_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
     company = db.query(Company).filter(Company.id == company_id).first()
 
     if not company:
@@ -46,7 +57,12 @@ def get_company(company_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{company_id}", status_code=status.HTTP_200_OK, response_model=CompanyResponse)
-def update_company(company_id: int, company_update: CompanyUpdate, db: Session = Depends(get_db)):
+def update_company(
+    company_id: int,
+    company_update: CompanyUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
 
     company = db.query(Company).filter(Company.id == company_id).first()
 
@@ -66,7 +82,11 @@ def update_company(company_id: int, company_update: CompanyUpdate, db: Session =
 
 
 @router.delete("/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_company(company_id: int, db: Session = Depends(get_db)):
+def delete_company(
+    company_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
 
     db_company = db.query(Company).filter(Company.id == company_id).first()
 
