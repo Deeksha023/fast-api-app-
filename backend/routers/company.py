@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Query
 from schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse
 from models.company import Company
 from sqlalchemy.orm import Session
@@ -23,10 +23,24 @@ def create_company(
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[CompanyResponse])
 def get_all_company(
+    name: str | None = Query(None, description="Filter by company name"),
+    email: str | None = Query(None, description="Filter by company email"),
+    phone: str | None = Query(None, description="Filter by company phone number"),
+    location: str | None = Query(None, description="Filter by company location"),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    companies = db.query(Company).all()
+    query = db.query(Company)
+    if name:
+        query = query.filter(Company.name.ilike(f"%{name}%"))
+    if email:
+        query = query.filter(Company.email.ilike(f"%{email}%"))
+    if phone:
+        query = query.filter(Company.phone.ilike(f"%{phone}%"))
+    if location:
+        query = query.filter(Company.location.ilike(f"%{location}%"))
+
+    companies = query.all()
     return companies
 
 

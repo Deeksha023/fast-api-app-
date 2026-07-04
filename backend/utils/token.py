@@ -1,17 +1,16 @@
-from jose import jwt
+from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from schemas.token import Token
 from dotenv import load_dotenv
 import os
-from models import users
-from fastapi import Depends, HTTPException
+from models.Users import User
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=2)):
@@ -28,9 +27,14 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=2
     return encoded_jwt
 
 
-def verify_access_token(token: str, db: Session = Depends(get_db)):
-    to_decode = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-    current_user = db.query(users).filter(users.id == to_decode["user_id"]).first()
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+def verify_token(token: str, db: Session):
+    try:
+        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+    except JWTError:
+        return None
+
+    current_user = db.query(User).filter(User.email == email).first()
     return current_user

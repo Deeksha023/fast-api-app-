@@ -147,3 +147,6 @@ eg:admin can do anything, user can do only specific things
 -->role_required() - for role based access control
 create_access_token() - for creating access token with(secrect_key,algorithm,payload) - token created then verify_access_token() - for decoding acccess token with 
 (secret_key, algorithm,token)-token decoded then
+
+
+POSTGRES_URL="postgres://postgres.wlupjezicqhckptsjpft:c7IpyGSFhqvMEH53@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x"

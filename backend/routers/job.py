@@ -12,7 +12,11 @@ router = APIRouter(prefix="/job", tags=["job"])
     status_code=status.HTTP_201_CREATED,
     response_model=JobResponse
 )
-def create_job(job: JobCreate, db: Session = Depends(get_db)):
+def create_job(
+    job: JobCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
     db_job = Job(**job.dict())
     db.add(db_job)
     db.commit()
@@ -25,7 +29,10 @@ def create_job(job: JobCreate, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=list[JobResponse]
 )
-def get_all_job(db: Session = Depends(get_db)):
+def get_all_job(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
     return db.query(Job).all()
 
 
@@ -34,7 +41,11 @@ def get_all_job(db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=JobResponse
 )
-def get_job(job_id: int, db: Session = Depends(get_db)):
+def get_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
 
     job = db.query(Job).filter(Job.id == job_id).first()
 
@@ -61,7 +72,12 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=JobResponse
 )
-def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db)):
+def update_job(
+    job_id: int,
+    job_update: JobUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
 
     job = db.query(Job).filter(Job.id == job_id).first()
 
@@ -84,7 +100,11 @@ def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db)
     "/{job_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_job(job_id: int, db: Session = Depends(get_db)):
+def delete_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(role_required(["admin"]))
+):
 
     db_job = db.query(Job).filter(Job.id == job_id).first()
 

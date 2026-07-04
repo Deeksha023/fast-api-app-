@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models.Users import User
-from schemas.users import UserCreate, UserLogin, UserResponse
+from schemas.users import UserCreate, UserResponse
 from schemas.token import Token
 from utils.security import hash_password, verify_password
 from utils.token import create_access_token
@@ -30,17 +32,31 @@ def authenticate_user(db: Session, email: str, password: str):
 
 
 @router.post("/login", response_model=Token)
-def login(login_data: UserLogin, db: Session = Depends(get_db)):
+async def login(
+    request: Request,
+    email: Optional[str] = Form(None),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    form_data = await request.form()
+    login_email = email or form_data.get("username")
+    if not login_email:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Email or username is required"
+        )
+
     user = authenticate_user(
         db,
-        login_data.email,
-        login_data.password
+        login_email,
+        password
     )
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"}
         )
 
     access_token = create_access_token(
