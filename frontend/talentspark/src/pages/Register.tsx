@@ -39,4 +39,4 @@ function Register({onSwitchToLogin}: Props){
     )
 }
 
-export default Register;
+export default Register; 
