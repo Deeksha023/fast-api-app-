@@ -1,6 +1,6 @@
-﻿from fastapi import APIRouter, HTTPException, status
+﻿from fastapi import APIRouter
 from schemas.chat import ChatRequest
-from Services.langchain_service import ask_ai
+from Services.langchain_service import ask_ai_with_memory
 
 router = APIRouter(
     prefix="/chat",
@@ -9,18 +9,11 @@ router = APIRouter(
 
 @router.post("/")
 def chat(request: ChatRequest):
-    try:
-        response = ask_ai(request.query)
-    except RuntimeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc)
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Chat service failed: {exc}"
-        )
+
+    response = ask_ai_with_memory(
+        request.query,
+        request.session_id
+    )
 
     return {
         "response": response

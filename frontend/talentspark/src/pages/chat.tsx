@@ -31,30 +31,32 @@ function Chat() {
     };
 
     return (
-        <div>
-            <h2>Career Chat</h2>
-            <div style={{ border: "1px solid #ccc", padding: "10px", height: "400px", overflowY: "scroll" }}>
-                {messages.length === 0 && <p>Ask me anything about your career!</p>}
+        <section className="chat-panel">
+            <div className="chat-header-panel">
+                <h2>Career Chat</h2>
+                <p>Get guidance on jobs, interviews, and career growth in real time.</p>
+            </div>
+            <div className="chat-window">
+                {messages.length === 0 && <p className="chat-empty">Ask me anything about your career!</p>}
                 {messages.map((msg, i) => (
-                    <div key={i} style={{ marginBottom: "10px" }}>
-                        <strong>{msg.role === "user" ? "You" : "Bot"}:</strong>
+                    <div key={i} className={msg.role === "user" ? "message-bubble user-message" : "message-bubble bot-message"}>
+                        <span className="message-role">{msg.role === "user" ? "You" : "TalentSpark"}</span>
                         <p>{msg.content}</p>
                     </div>
                 ))}
-                {loading && <p><em>Thinking...</em></p>}
+                {loading && <p className="chat-loading">Thinking...</p>}
             </div>
-            <form onSubmit={handleSend} style={{ marginTop: "10px" }}>
+            <form onSubmit={handleSend} className="chat-input-row">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
-                    style={{ width: "80%" }}
                     disabled={loading}
                 />
-                <button type="submit" disabled={loading}>Send</button>
+                <button type="submit" className="btn" disabled={loading}>Send</button>
             </form>
-        </div>
+        </section>
     );
 }
 

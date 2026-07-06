@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {register} from "../Services/AuthServices";
+import {register} from "../Services/AuthService";
 
 type Props = {
     onSwitchToLogin: () => void;

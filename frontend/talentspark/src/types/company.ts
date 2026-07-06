@@ -8,3 +8,4 @@ interface Company{
     jobs:Job[];
 }
 export type {Company}
+

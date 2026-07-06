@@ -7,9 +7,9 @@ import { getCompanies, updateCompany, deleteCompany, createCompany } from "./Ser
 import { getJobs, updateJob, deleteJob, createJob } from "./Services/JobService";
 import type { Company } from "./types/company"
 import type { Job } from "./types/job"
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Register from "./pages/Register";
-import Chat from "./pages/Chat";
+import Chat from "./pages/chat";
 
 
 function App() {
@@ -132,33 +132,34 @@ function App() {
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div className="status-message">Error: {error.message}</div>
   }
   return (
-    <>
+    <div className="app-shell">
       <NavBar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <br />
-      {currentPage === "home" && (
-        <>
-          <CompanyCard
-            companies={companies}
-            jobs={jobs}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAdd={handleAdd}
-          />
-          <JobCard
-            jobs={jobs}
-            companies={companies}
-            onEdit={handleJobEdit}
-            onDelete={handleJobDelete}
-            onAdd={handleJobAdd}
-          />
-        </>
-      )}
-      {currentPage === "chat" && <Chat />}
+      <main className="main-content">
+        {currentPage === "home" && (
+          <>
+            <CompanyCard
+              companies={companies}
+              jobs={jobs}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onAdd={handleAdd}
+            />
+            <JobCard
+              jobs={jobs}
+              companies={companies}
+              onEdit={handleJobEdit}
+              onDelete={handleJobDelete}
+              onAdd={handleJobAdd}
+            />
+          </>
+        )}
+        {currentPage === "chat" && <Chat />}
+      </main>
       <Footer />
-    </>
+    </div>
   )
 }
 

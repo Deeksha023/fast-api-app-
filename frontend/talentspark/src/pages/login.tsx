@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {login} from "../Services/AuthServices";
+import {login} from "../Services/AuthService";
 
 type Props = {
     onLogin: (token: string) => void;
@@ -21,15 +21,40 @@ function Login({onLogin, onSwitchToRegister}: Props){
         }
     }   
     return(
-        <form onSubmit={handleSubmit}>
-            <h2>Login</h2>
-            <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" required/>
-            <br />
-            <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" required/>
-            <br />
-            <button type="submit">Login</button>
-            <p>Don't have an account? <button type="button" onClick={onSwitchToRegister}>Register</button></p>
-        </form>
+        <div className="auth-container auth-background">
+            <div className="auth-card auth-card--login">
+                <div className="auth-brand">
+                    <div className="brand-text">
+                        <span className="brand-name">Talent</span>
+                        <span className="brand-accent">Spark</span>
+                    </div>
+                </div>
+                <div className="auth-header">
+                    <h2>Welcome back</h2>
+                    <p>Sign in to continue to TalentSpark.</p>
+                </div>
+                <form onSubmit={handleSubmit} className="auth-form">
+                    <label htmlFor="email">Email address</label>
+                    <div className="input-group">
+                        <span className="input-icon">✉</span>
+                        <input id="email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Enter your email" required />
+                    </div>
+
+                    <label htmlFor="password">Password</label>
+                    <div className="input-group">
+                        <span className="input-icon">🔒</span>
+                        <input id="password" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Enter your password" required />
+                    </div>
+
+                    <button type="submit" className="btn auth-submit">Login</button>
+                </form>
+                <div className="auth-divider"><span>or</span></div>
+                <div className="auth-footer">
+                    <span>Don't have an account?</span>
+                    <button type="button" className="btn secondary" onClick={onSwitchToRegister}>Register</button>
+                </div>
+            </div>
+        </div>
     )
 }
 

@@ -150,3 +150,52 @@ create_access_token() - for creating access token with(secrect_key,algorithm,pay
 
 
 POSTGRES_URL="postgres://postgres.wlupjezicqhckptsjpft:c7IpyGSFhqvMEH53@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x"
+
+
+
+
+Task
+RAG->Retrieval Augmented Generation
+It is used to increase the accuracy of llm by providing relevant information to the llm->it is used to increase the accuracy of llm by providing relevant information to the llm
+
+How it will make chunks in vector db?let’s say we have 3 documents->one each one has 100 wordsso it will make 3 chunks--each chunk will overlap with previous chunk by 100 chars->so each chunk will have 500 chars
+
+like 0-499
+400-899
+800-1399
+this chunk will be converted into vectors
+# Task
+
+chars->so each chunk will have 500 chars
+like 0-499
+400-899
+800-1399
+
+
+this chunk will be converted into vectors
+eg:i am a python developer. i have 3 years of experience in python development.
+i have good knowledge of python development and i am a good python developer.
+i have good knowledge of fastapi
+->will convert all the 3 chunks into vectors
+
+goldilocks principle->just right amount of information
+semantic search->it is used to find the most relevant information to the query->it is used to find the most relevant information to the query
+
+semantic similarity
+it is used to find the most similar vectors
+if two vectors are close to each other then they are similar
+
+cosine similarity->used in nlp to find the similarity between two vectors
+
+qdrantdb is vectoir database 
+it is used to store the vectors  and do the semantic search 
+
+embeddings model-> it is used to conert the text into vectors
+
+initially without rag
+
+user query-->send to llm-->here transformers model will answer based on its training data ->response
+
+with rag
+user query->embed done by embedings model->vector->semantic-> search done by qdranticdb(vector db)->retrive relevant chunks->construct prompt--> combined text+ query->llm->response
+

@@ -1,4 +1,4 @@
-import type {LoginRequest,LoginResponse,RegisterRequest,RegisterResponse} from "../types/Users";
+import type {LoginRequest,LoginResponse,RegisterRequest,RegisterResponse} from "../types/User";
 import axios from "axios";
 const API_URL = "http://localhost:8000/auth";
 

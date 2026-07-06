@@ -1,16 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 class UserBase(BaseModel):
-    name: str
+    name: Optional[str] = None
     email: str
+    password: str
     role: str
 
-class UserCreate(UserBase):
-    password: str
 
-class UserLogin(BaseModel):
-    email: str
-    password: str
+class UserCreate(UserBase):
+    pass
 
 class UserResponse(BaseModel):
     id: int
@@ -18,6 +17,8 @@ class UserResponse(BaseModel):
     email: str
     role: str
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = ConfigDict(from_attributes=True)
+
+class Login_User(BaseModel):
+    email: str
+    password: str

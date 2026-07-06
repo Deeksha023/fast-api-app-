@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import Base, engine
+from database import Base, engine, ensure_users_schema
 from models import job as job_model, company as company_model, Users as user_model
 from routers import company, job,auth,chat
 
@@ -16,6 +16,7 @@ app.add_middleware(
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+ensure_users_schema()
 
 print(engine)
 

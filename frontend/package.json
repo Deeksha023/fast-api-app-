@@ -4,6 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "dev": "npm --prefix talentspark run dev",
+    "build": "npm --prefix talentspark run build",
+    "preview": "npm --prefix talentspark run preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
