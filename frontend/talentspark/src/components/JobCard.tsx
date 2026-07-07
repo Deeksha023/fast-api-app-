@@ -67,6 +67,12 @@ function JobCard({
                 <p className="panel-description">Track open roles and assign them to the right company.</p>
             </div>
             <div className="card-grid">
+                {jobs.length === 0 && (
+                    <article className="entity-card empty-card">
+                        <h3>No jobs yet</h3>
+                        <p>Add a job below and choose the company it belongs to. Company cards will then show the correct opening count.</p>
+                    </article>
+                )}
                 {jobs.map((job) => (
                     <article className="entity-card" key={job.id}>
                         {editJobId === job.id ? (
@@ -74,7 +80,12 @@ function JobCard({
                                 <input type="text" value={editform.title} onChange={(e)=>setEditform({...editform,title:e.target.value})} placeholder="Title" />
                                 <input type="text" value={editform.description} onChange={(e)=>setEditform({...editform,description:e.target.value})} placeholder="Description" />
                                 <input type="text" value={editform.salary} onChange={(e)=>setEditform({...editform,salary:e.target.value})} placeholder="Salary" />
-                                <input type="number" value={editform.company_id} onChange={(e)=>setEditform({...editform,company_id:Number(e.target.value)})} placeholder="Company ID" />
+                                <select value={editform.company_id} onChange={(e)=>setEditform({...editform,company_id:Number(e.target.value)})}>
+                                    <option value={0}>Select company</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>{company.name}</option>
+                                    ))}
+                                </select>
                                 <div className="button-row">
                                     <button className="btn" onClick={handleSave}>Save</button>
                                     <button className="btn secondary" onClick={handlecancel}>Cancel</button>
@@ -112,7 +123,12 @@ function JobCard({
                     <input type="text" value={addform.title} onChange={(e)=>setAddform({...addform,title:e.target.value})} placeholder="Title" />
                     <input type="text" value={addform.description} onChange={(e)=>setAddform({...addform,description:e.target.value})} placeholder="Description" />
                     <input type="text" value={addform.salary} onChange={(e)=>setAddform({...addform,salary:e.target.value})} placeholder="Salary" />
-                    <input type="number" value={addform.company_id} onChange={(e)=>setAddform({...addform,company_id:Number(e.target.value)})} placeholder="Company ID" />
+                    <select value={addform.company_id} onChange={(e)=>setAddform({...addform,company_id:Number(e.target.value)})}>
+                        <option value={0}>Select company</option>
+                        {companies.map((company) => (
+                            <option key={company.id} value={company.id}>{company.name}</option>
+                        ))}
+                    </select>
                     <button className="btn" onClick={handleAdd}>Add Job</button>
                 </div>
             </article>
@@ -121,3 +137,4 @@ function JobCard({
 }
 
 export default JobCard
+

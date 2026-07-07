@@ -4,5 +4,6 @@ interface Job{
     description:string;
     salary:string;
     company_id:number;
+    company_name?:string;
 }
 export type {Job}

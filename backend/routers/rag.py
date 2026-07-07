@@ -1,4 +1,4 @@
-fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from schemas.rag import (
@@ -8,9 +8,10 @@ from schemas.rag import (
     EmbedResponse,
     JobSearchRequest, SemanticSearchResponse, SemanticSearchResult
 )
-from services.resume_service import analyse_resume
-from services.qdrant_service import embed_all_jobs, search_jobs, match_jobs_for_profile
-from services.rag_service import rag_job_search
+# Use the actual Services package/module names present in the project
+from Services.resume_services import analyze_resume
+from Services.qdrant_services import embed_all_jobs, search_jobs, match_jobs_for_profile
+from Services.rag_service import rag_job_search
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
@@ -37,7 +38,7 @@ def rag_ask(request: RagSearchRequest):
 
 @router.post("/analyse-resume", response_model=ResumeResponse)
 def resume_analyse(request: ResumeRequest):
-    analysis = analyse_resume(request.resume_text)
+    analysis = analyze_resume(request.resume_text)
     return ResumeResponse(analysis=analysis)
 
 
@@ -45,20 +46,15 @@ def resume_analyse(request: ResumeRequest):
 def job_match(request: JobMatchRequest):
     results = match_jobs_for_profile(request.skills, request.experience, top_k=5)
     return JobMatchResponse(
-        matches=[JobMatchResult(**r) for r in results]
+        matches=[JobMatchResult(
+            job_id=r.get('job_id'),
+            title=r.get('title', ''),
+            description=r.get('description', ''),
+            salary=r.get('salary'),
+            match_score=r.get('score', 0.0)
+        ) for r in results]
     )
 
-
-#                     Client
-#                       │
-#           HTTP POST Request (JSON)
-#                       │
-#                       ▼
-#               FastAPI Router
-#                       │
-#       ┌───────────────┼──────────────────┐
-#       │               │                  │
-#       ▼               ▼                  ▼
 #  Resume API      Search API        RAG API
 #       │               │                  │
 #       ▼               ▼                  ▼

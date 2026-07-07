@@ -32,27 +32,35 @@ def ensure_qdrant_collection():
             distance=Distance.COSINE)
         )
 def embed_text(text: str) -> list[float]:
-    return next(embeddings_model.embed()).tolist()
+    # fastembed expects a list of documents
+    return next(embeddings_model.embed([text])).tolist()
 
 def embed_all_jobs(db: Session) -> int:
-    ensure_collection()
+    ensure_qdrant_collection()
     jobs = db.query(Job).all()
     if not jobs:
         return 0
     points = []
     for job in jobs:
-        text=f"{job.title} {job.description or' '}"
+        text = f"{job.title} {job.description or ' '}"
         vector = embed_text(text)
         points.append(
             PointStruct(
                 id=job.id,
                 vector=vector,
-                payload={"title": job.title, "description": job.description}
+                payload={
+                    "job_id": job.id,
+                    "title": job.title,
+                    "description": job.description,
+                    "salary": job.salary,
+                }
             )
         )
     qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
+    return len(points)
+
 def search_jobs(query: str, top_k: int = 5) -> list[dict]:
-    ensure_collection()
+    ensure_qdrant_collection()
     query_vector = embed_text(query)
     results = qdrant.query_points(
         collection_name=COLLECTION_NAME,
@@ -61,33 +69,32 @@ def search_jobs(query: str, top_k: int = 5) -> list[dict]:
     )
     return [
         {
-            "job_id": hit.payload.get("job_id"),
-            "title": hit.payload.get("title"),
-            "description": hit.payload.get("description"),
-            "salary": hit.payload.get("salary"),
-            "score": round(hit.score, 4)
+            "job_id": hit.payload.get("job_id") if hasattr(hit.payload, "get") else hit.payload.get("job_id", None),
+            "title": hit.payload.get("title") if hasattr(hit.payload, "get") else hit.payload.get("title", ""),
+            "description": hit.payload.get("description") if hasattr(hit.payload, "get") else hit.payload.get("description", ""),
+            "salary": hit.payload.get("salary") if hasattr(hit.payload, "get") else hit.payload.get("salary", None),
+            "score": round(hit.score, 4) if hasattr(hit, "score") else 0.0
         }
-        for hit in results.points
-    
-]
+        for hit in getattr(results, "points", [])
+    ]
 
-def match_jobs_for_profile(skills:str,experience:str,top_k:int=5)->list[dict]:
-    ensure_collection()
-    profile_text=f"{skills} {experience}"
-    profile_vector=embed_text(profile_text)
-    results=qdrant.query_points(
+def match_jobs_for_profile(skills: str, experience: str, top_k: int = 5) -> list[dict]:
+    ensure_qdrant_collection()
+    profile_text = f"{skills} {experience}"
+    profile_vector = embed_text(profile_text)
+    results = qdrant.query_points(
         collection_name=COLLECTION_NAME,
         query=profile_vector,
         limit=top_k
     )
     return [
         {
-            "job_id": hit.payload.get("job_id"),
-            "title": hit.payload.get("title"),
-            "description": hit.payload.get("description"),
-            "salary": hit.payload.get("salary"),
-            "score": round(hit.score, 4)
+            "job_id": hit.payload.get("job_id") if hasattr(hit.payload, "get") else hit.payload.get("job_id", None),
+            "title": hit.payload.get("title") if hasattr(hit.payload, "get") else hit.payload.get("title", ""),
+            "description": hit.payload.get("description") if hasattr(hit.payload, "get") else hit.payload.get("description", ""),
+            "salary": hit.payload.get("salary") if hasattr(hit.payload, "get") else hit.payload.get("salary", None),
+            "score": round(hit.score, 4) if hasattr(hit, "score") else 0.0
         }
-        for hit in results.points
+        for hit in getattr(results, "points", [])
     ]
     

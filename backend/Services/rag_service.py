@@ -1,14 +1,13 @@
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_core.prompts import PromptTemplate
-from services.qdrant_services import search_jobs
+from langchain_core.prompts import ChatPromptTemplate
+from Services.qdrant_services import search_jobs
 load_dotenv()
 llm=ChatGroq(
     model="llama-3.3-70b-versatile",
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.3,
-    temparature=0.3
 )
 rag_prompt = ChatPromptTemplate.from_messages([
     ("system", """You are a job search assistant.
@@ -36,6 +35,7 @@ def rag_job_search(question: str) -> str:
     ])
     
     response = rag_chain.invoke({"context": context, "question": question})
-    return response.context
+    # Return textual content from the model response
+    return getattr(response, "content", str(response))
     # Typically followed by:
     # return rag_chain.invoke({"context": context, "question": question})

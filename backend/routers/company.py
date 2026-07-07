@@ -3,13 +3,13 @@ from schemas.company import CompanyCreate,CompanyUpdate,CompanyResponse
 from models.company import Company
 from sqlalchemy.orm import Session
 from database import get_db,SessionLocal
-from utils.oauth2 import get_current_user,role_required
+from utils.oauth2 import get_current_user
 
 router=APIRouter(prefix="/company", tags=["company"])
 company=[]
 @router.post("/",status_code=status.HTTP_201_CREATED,response_model=CompanyResponse)
 def create_company(company_create:CompanyCreate,
-                   db: Session = Depends(get_db),current_user=Depends(role_required(["admin"]))):
+                   db: Session = Depends(get_db),current_user=Depends(get_current_user)):
     db_company=Company(**company_create.dict())
     db.add(db_company)
     db.commit()
@@ -29,7 +29,7 @@ def get_company(company_id:int,db: Session = Depends(get_db)):
     return company
 
 @router.put("/{company_id}",status_code=status.HTTP_201_CREATED)
-def update_company(company_id: int, company_update: CompanyUpdate,db: Session = Depends(get_db),current_user=Depends(role_required(["admin"]))):
+def update_company(company_id: int, company_update: CompanyUpdate,db: Session = Depends(get_db),current_user=Depends(get_current_user)):
     db_company = db.query(Company).filter(Company.id == company_id).first()
     if not db_company:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Company with id {company_id} not found")
@@ -40,7 +40,7 @@ def update_company(company_id: int, company_update: CompanyUpdate,db: Session = 
     return db_company
 
 @router.delete("/{company_id}",status_code=status.HTTP_204_NO_CONTENT)
-def delete_company(company_id: int,db: Session = Depends(get_db),current_user=Depends(role_required(["admin"]))):
+def delete_company(company_id: int,db: Session = Depends(get_db),current_user=Depends(get_current_user)):
     db_company = db.query(Company).filter(Company.id == company_id).first()
     if not db_company:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Company with id {company_id} not found")

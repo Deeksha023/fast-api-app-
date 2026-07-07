@@ -10,7 +10,22 @@ import type { Job } from "./types/job"
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Chat from "./pages/chat";
+import ResumeAnalysis from "./pages/ResumeAnalysis";
+import "./App.css";
 
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = (error as { response?: { data?: { detail?: string } | string } }).response;
+    if (typeof response?.data === "string") {
+      return response.data;
+    }
+    if (response?.data?.detail) {
+      return response.data.detail;
+    }
+  }
+
+  return error instanceof Error ? error.message : "Something went wrong";
+}
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -19,7 +34,13 @@ function App() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const [page, setPage] = useState<"login" | "register">("login");
-  const [currentPage, setCurrentPage] = useState("home");
+  const [currentPage, setCurrentPage] = useState<"home" | "chat" | "resume">(() => {
+    if (typeof window !== "undefined") {
+      if (window.location.pathname === "/resume") return "resume";
+      if (window.location.pathname === "/chat") return "chat";
+    }
+    return "home";
+  });
 
   const handleLogin = (newToken: string) => {
     localStorage.setItem("token", newToken);
@@ -36,7 +57,7 @@ function App() {
       setCompanies(companiesData);
       setJobs(jobsData);
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     } finally {
       setLoading(false);
     }
@@ -51,7 +72,7 @@ function App() {
         )
       );
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -62,7 +83,7 @@ function App() {
         prev.filter(company => company.id !== id)
       );
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -71,7 +92,7 @@ function App() {
       const newCompany = await createCompany(company);
       setCompanies(prev => [...prev, newCompany]);
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -84,7 +105,7 @@ function App() {
         )
       );
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -95,7 +116,7 @@ function App() {
         prev.filter(job => job.id !== id)
       );
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -104,7 +125,7 @@ function App() {
       const newJob = await createJob(job);
       setJobs(prev => [...prev, newJob]);
     } catch (error) {
-      setError(error as Error);
+      setError(new Error(getErrorMessage(error)));
     }
   }
 
@@ -114,6 +135,32 @@ function App() {
       fetchData();
     }
   }, [token]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const path = window.location.pathname;
+    if (path === "/resume") setCurrentPage("resume");
+    else if (path === "/chat") setCurrentPage("chat");
+    else setCurrentPage("home");
+
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === "/resume") setCurrentPage("resume");
+      else if (path === "/chat") setCurrentPage("chat");
+      else setCurrentPage("home");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const targetPath = currentPage === "resume" ? "/resume" : currentPage === "chat" ? "/chat" : "/";
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, "", targetPath);
+    }
+  }, [currentPage]);
 
   if (!token) {
     return (
@@ -156,6 +203,7 @@ function App() {
             />
           </>
         )}
+        {currentPage === "resume" && <ResumeAnalysis />}
         {currentPage === "chat" && <Chat />}
       </main>
       <Footer />
@@ -164,3 +212,5 @@ function App() {
 }
 
 export default App
+
+
