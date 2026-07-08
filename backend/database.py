@@ -1,37 +1,58 @@
-from sqlalchemy import create_engine, inspect, text
-from sqlalchemy.orm import sessionmaker, declarative_base
+import os
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    async_sessionmaker,
+    AsyncSession,
+)
+from sqlalchemy.orm import declarative_base
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:Deeksha%402005@localhost:5432/postgres"
+load_dotenv()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:Deeksha%402005@localhost:5432/student_db"
+)
 
-SessionLocal = sessionmaker(
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql+asyncpg://",
+        1
+    )
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql://",
+        "postgresql+asyncpg://",
+        1
+    )
+
+if "supabase.com" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.split("?")[0]
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        connect_args={"ssl": "require"}
+    )
+else:
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False
+    )
+
+SessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
     autocommit=False,
-    autoflush=False,
-    bind=engine
+    autoflush=False
 )
 
 Base = declarative_base()
 
 
-def ensure_users_schema():
-    inspector = inspect(engine)
-    if "users" not in inspector.get_table_names():
-        return
-
-    columns = {column["name"] for column in inspector.get_columns("users")}
-    with engine.begin() as connection:
-        if "username" not in columns:
-            connection.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(255)"))
-        if "hashed_password" not in columns:
-            connection.execute(text("ALTER TABLE users ADD COLUMN hashed_password VARCHAR(255)"))
-        if "role" not in columns:
-            connection.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'Candidate'"))
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with SessionLocal() as db:
+        try:
+            yield db
+        finally:
+            await db.close()

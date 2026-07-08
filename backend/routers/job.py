@@ -1,88 +1,69 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from schemas.job import JobCreate, JobUpdate, JobResponse
-from models.job import Job
+from schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse 
 from models.company import Company
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from database import get_db
-from utils.oauth2 import get_current_user
+from utils.oauth2 import get_current_user, role_required
 
-router = APIRouter(prefix="/job", tags=["job"])
+router = APIRouter(prefix="/company", tags=["company"])
+company = []
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)
+async def create_company(company_create: CompanyCreate, db: AsyncSession = Depends(get_db), current_user = Depends(role_required(["admin"]))):
+    try:
+        db_company = Company(**company_create.dict())
+        db.add(db_company)
+        await db.commit()
+        await db.refresh(db_company)
+        return db_company
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error creating company: {str(e)}")
+
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[CompanyResponse])
+async def get_all_company(db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(select(Company))
+        companies = result.scalars().all()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error fetching companies: {str(e)}")
+    return companies
+
+@router.get("/{company_id}", status_code=status.HTTP_200_OK, response_model=CompanyResponse)
+async def get_company(company_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+    result = await db.execute(select(Company).filter(Company.id == company_id))
+    company = result.scalar_one_or_none()
+    if not company:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Company with id {company_id} not found")
+    return company
+
+@router.put("/{company_id}", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)
+async def update_company(company_id: int, company_update: CompanyUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(role_required(["admin"]))):
+    result = await db.execute(select(Company).filter(Company.id == company_id))
+    db_company = result.scalar_one_or_none()
+    if not db_company:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Company with id {company_id} not found")
+    for key, value in company_update.dict().items():
+        setattr(db_company, key, value) #auto changes value in api by setattr function
+    await db.commit()
+    await db.refresh(db_company) #it makes a new object with updated values and returns it to the user
+    return db_company
+
+@router.delete("/{company_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_company(company_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(role_required(["admin"]))):
+    db_company = await db.execute(select(Company).filter(Company.id == company_id))
+    db_company = db_company.scalar_one_or_none()
+    if not db_company:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Company with id {company_id} not found")
+    await db.delete(db_company)
+    await db.commit()
+    return {"message": "Company deleted successfully"}
 
 
-def get_or_create_company_id(db: Session, company_id: int | None = None, company_name: str | None = None):
-    clean_name = company_name.strip() if company_name else ""
+# @router.get("/")
+# def read_company():
+#     return {"company": "Company root."}
 
-    if clean_name:
-        company = db.query(Company).filter(func.lower(Company.name) == clean_name.lower()).first()
-        if company:
-            return company.id
-
-        company = Company(name=clean_name)
-        db.add(company)
-        db.flush()
-        return company.id
-
-    if company_id:
-        company = db.query(Company).filter(Company.id == company_id).first()
-        if not company:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with id {company_id} not found"
-            )
-        return company.id
-
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Company name is required"
-    )
-
-
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=JobResponse)
-def create_job(job_create: JobCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    job_data = job_create.dict()
-    company_name = job_data.pop("company_name", None)
-    job_data["company_id"] = get_or_create_company_id(db, job_data.get("company_id"), company_name)
-
-    db_job = Job(**job_data)
-    db.add(db_job)
-    db.commit()
-    db.refresh(db_job)
-    return db_job
-
-@router.get("/", response_model=list[JobResponse])
-def get_all_job(db: Session = Depends(get_db)):
-    jobs = db.query(Job).all()
-    return jobs
-
-@router.get("/{job_id}", response_model=JobResponse)
-def get_job(job_id: int, db: Session = Depends(get_db)):
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with id {job_id} not found")
-    return job
-
-@router.put("/{job_id}", response_model=JobResponse)
-def update_job(job_id: int, job_update: JobUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    db_job = db.query(Job).filter(Job.id == job_id).first()
-    if not db_job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with id {job_id} not found")
-
-    update_data = job_update.dict(exclude_unset=True)
-    company_name = update_data.pop("company_name", None)
-    if company_name is not None or "company_id" in update_data:
-        update_data["company_id"] = get_or_create_company_id(db, update_data.get("company_id"), company_name)
-
-    for key, value in update_data.items():
-        setattr(db_job, key, value)
-    db.commit()
-    db.refresh(db_job)
-    return db_job
-
-@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_job(job_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    db_job = db.query(Job).filter(Job.id == job_id).first()
-    if not db_job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with id {job_id} not found")
-    db.delete(db_job)
-    db.commit()
+# @router.get("/{company_id}")
+# def read_company(company_id: int):
+#     return {"company_id": company_id}

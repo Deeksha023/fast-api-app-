@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import Base, engine, ensure_users_schema
+from database import Base, engine
 from models import job as job_model, company as company_model, Users as user_model
-from routers import company, job,auth,chat, rag
+from routers import company, job,auth,chat,rag
 
 
 app = FastAPI()
@@ -15,10 +15,11 @@ app.add_middleware(
 )
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
-ensure_users_schema()
-
-print(engine)
+@app.on_event("startup")
+async def startup_event():
+    from database import engine
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 app.include_router(company.router)
 app.include_router(job.router)

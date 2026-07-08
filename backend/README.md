@@ -199,3 +199,23 @@ user query-->send to llm-->here transformers model will answer based on its trai
 with rag
 user query->embed done by embedings model->vector->semantic-> search done by qdranticdb(vector db)->retrive relevant chunks->construct prompt--> combined text+ query->llm->response
 
+
+
+Task
+
+Before Deployment Checklist
+
+- .env configured
+- On startup, create all tables in the database.
+- Use async/await in every API and function.
+- Implement proper session handling for all APIs.
+- Exception handling for all APIs:
+  - Resource Not Found
+  - Internal Server Error
+  - Bad Request
+  - Unauthorized
+  - Forbidden
+  - Validation Error
+  - Email Already Exists
+  - Password Incorrect
+  - Company Not Found
