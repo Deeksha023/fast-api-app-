@@ -11,20 +11,11 @@ import Login from "./pages/login";
 import Register from "./pages/Register";
 import Chat from "./pages/chat";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
+import { getAxiosErrorMessage } from "./Services/api";
 import "./App.css";
 
 function getErrorMessage(error: unknown) {
-  if (typeof error === "object" && error !== null && "response" in error) {
-    const response = (error as { response?: { data?: { detail?: string } | string } }).response;
-    if (typeof response?.data === "string") {
-      return response.data;
-    }
-    if (response?.data?.detail) {
-      return response.data.detail;
-    }
-  }
-
-  return error instanceof Error ? error.message : "Something went wrong";
+  return getAxiosErrorMessage(error);
 }
 
 function App() {
@@ -212,5 +203,7 @@ function App() {
 }
 
 export default App
+
+
 
 

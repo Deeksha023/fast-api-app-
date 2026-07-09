@@ -91,7 +91,7 @@ function CompanyCard({
                                 <p><strong>Email:</strong> {company.email}</p>
                                 <p><strong>Phone:</strong> {company.phone}</p>
                                 <p><strong>Location:</strong> {company.location}</p>
-                                <p><strong>Jobs:</strong> {jobs.filter(j => j.company_id === company.id).length} opening{jobs.filter(j => j.company_id === company.id).length === 1 ? '' : 's'}</p>
+                                <p><strong>Jobs:</strong> {(company.jobs?.length || jobs.filter(j => j.company_id === company.id).length)} opening{(company.jobs?.length || jobs.filter(j => j.company_id === company.id).length) === 1 ? '' : 's'}</p>
                                 <div className="button-row">
                                     <button className="btn" onClick={() => {
                                         setEditCompanyId(company.id);

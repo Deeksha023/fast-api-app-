@@ -1,20 +1,19 @@
-import type {LoginRequest,LoginResponse,RegisterRequest,RegisterResponse} from "../types/User";
-import axios from "axios";
-const API_URL = "http://localhost:8000/auth";
+import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from "../types/User";
+import api from "./api";
 
-export const login = async (credentials:LoginRequest):Promise<LoginResponse>=>{
-    // Backend expects OAuth2PasswordRequestForm (form-encoded with "username" field)
+export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
+    // Backend login accepts OAuth-style form data with username=email.
     const formData = new URLSearchParams();
     formData.append("username", credentials.email);
     formData.append("password", credentials.password);
 
-    const response = await axios.post<LoginResponse>(`${API_URL}/login`, formData, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    const response = await api.post<LoginResponse>("/auth/login", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
     return response.data;
-}
+};
 
-export const register = async (user:RegisterRequest):Promise<RegisterResponse>=>{
-    const response = await axios.post<RegisterResponse>(`${API_URL}/register`,user);
+export const register = async (user: RegisterRequest): Promise<RegisterResponse> => {
+    const response = await api.post<RegisterResponse>("/auth/register", user);
     return response.data;
-}
+};

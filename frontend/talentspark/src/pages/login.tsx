@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {login} from "../Services/AuthService";
+import { getAxiosErrorMessage } from "../Services/api";
 
 type Props = {
     onLogin: (token: string) => void;
@@ -15,9 +16,9 @@ function Login({onLogin, onSwitchToRegister}: Props){
         try {
             const response = await login({email,password});
             onLogin(response.access_token);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error during login:", error);
-            const msg = error?.response?.data?.detail || error?.response?.data || error.message || "Login failed";
+            const msg = getAxiosErrorMessage(error);
             alert(`Login failed: ${msg}`);
         }
     }   

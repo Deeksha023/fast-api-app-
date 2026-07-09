@@ -1,6 +1,8 @@
+type Page = "home" | "resume" | "chat";
+
 type Props = {
-    currentPage: string;
-    onNavigate: (page: string) => void;
+    currentPage: Page;
+    onNavigate: (page: Page) => void;
 }
 
 function NavBar({ currentPage, onNavigate }: Props) {
@@ -22,3 +24,4 @@ function NavBar({ currentPage, onNavigate }: Props) {
 }
 
 export default NavBar
+

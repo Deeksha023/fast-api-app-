@@ -38,24 +38,15 @@ function ResumeAnalysis() {
         <h2>Resume Analysis</h2>
         <p>Paste your resume below to get insights into skills, strengths, and improvement areas.</p>
       </div>
-      <form onSubmit={handleAnalyze} className="chat-input-row">
+      <form onSubmit={handleAnalyze} className="resume-analysis-form">
         <textarea
+          className="resume-textarea"
           value={resumeText}
           onChange={(e) => setResumeText(e.target.value)}
           placeholder="Paste your resume text here..."
           rows={10}
-          style={{
-            flex: 1,
-            resize: "vertical",
-            borderRadius: "16px",
-            border: "1px solid rgba(148, 163, 184, 0.18)",
-            background: "rgba(15, 23, 42, 0.95)",
-            color: "#e2e8f0",
-            padding: "16px",
-            minHeight: "220px",
-          }}
         />
-        <button type="submit" className="btn" style={{ width: 160 }} disabled={loading}>
+        <button type="submit" className="btn resume-analyze-button" disabled={loading}>
           {loading ? "Analyzing..." : "Analyze"}
         </button>
       </form>
@@ -82,3 +73,4 @@ function ResumeAnalysis() {
 }
 
 export default ResumeAnalysis;
+
