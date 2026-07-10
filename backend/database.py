@@ -1,4 +1,4 @@
-import os
+﻿import os
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_sessionmaker,
@@ -27,24 +27,24 @@ elif DATABASE_URL.startswith("postgresql://"):
         1
     )
 
+connect_args = {"statement_cache_size": 0}
+
 if "supabase.com" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.split("?")[0]
-    engine = create_async_engine(
-        DATABASE_URL,
-        echo=False,
-        connect_args={"ssl": "require"}
-    )
-else:
-    engine = create_async_engine(
-        DATABASE_URL,
-        echo=False
-    )
+    connect_args["ssl"] = "require"
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    connect_args=connect_args
+)
 
 SessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
+    expire_on_commit=False
 )
 
 Base = declarative_base()
@@ -56,3 +56,4 @@ async def get_db():
             yield db
         finally:
             await db.close()
+

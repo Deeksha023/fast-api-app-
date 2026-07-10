@@ -1,0 +1,8 @@
+D:\deeksha_repo\fast-api-app-\backend\routers\chat.py:3: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  from Services.langchain_service import ask_ai_with_memory
+INFO:     Started server process [17944]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8000): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.

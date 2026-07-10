@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+﻿from fastapi import APIRouter, HTTPException, Depends, status
 from schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse
 from models.company import Company
 from sqlalchemy.exc import IntegrityError
@@ -24,11 +24,13 @@ async def get_company_with_jobs(db: AsyncSession, company_id: int):
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CompanyResponse)
 async def create_company(company_create: CompanyCreate, db: AsyncSession = Depends(get_db), current_user = Depends(role_required(["admin"]))):
     try:
-        db_company = Company(**company_create.model_dump())
+        company_data = company_create.model_dump()
+        db_company = Company(**company_data)
         db.add(db_company)
+        await db.flush()
+        company_id = db_company.id
         await db.commit()
-        created_company = await get_company_with_jobs(db, db_company.id)
-        return created_company
+        return {**company_data, "id": company_id, "jobs": []}
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company email or phone already exists")
@@ -85,3 +87,5 @@ async def delete_company(company_id: int, db: AsyncSession = Depends(get_db), cu
     await db.delete(db_company)
     await db.commit()
     return {"message": "Company deleted successfully"}
+
+

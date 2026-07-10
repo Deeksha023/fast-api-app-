@@ -1,7 +1,8 @@
-from typing import Optional
+﻿from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from models.Users import Users
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.users import UserCreate, UserResponse
@@ -12,30 +13,40 @@ from utils.token import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
+def normalize_role(role: str) -> str:
+    role_map = {
+        "admin": "admin",
+        "candidate": "Candidate",
+    }
+    return role_map.get(str(role).strip().lower(), str(role).strip())
+
+
 @router.post("/register", response_model=UserResponse)
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
-        # Check if the user already exists
-        result = await db.execute(select(Users).filter(Users.email == user.email))
+        email = user.email.strip().lower()
+
+        result = await db.execute(select(Users).filter(Users.email == email))
         existing_user = result.scalars().first()
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
 
-        # Hash the password
         hashed_password = hash_password(user.password)
+        username = (user.name or email).strip()
 
-        # Determine a display name from available fields
-        username = user.name or user.email
+        result = await db.execute(select(Users).filter(Users.username == username))
+        existing_username = result.scalars().first()
+        if existing_username:
+            username = email
 
-        # Create a new user instance
         db_user = Users(
             username=username,
-            email=user.email,
+            email=email,
             hashed_password=hashed_password,
-            role=user.role
+            role=normalize_role(user.role),
         )
 
-        # Add the new user to the database
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
@@ -43,10 +54,15 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         return db_user
     except HTTPException:
         raise
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Email or username already registered")
     except Exception as e:
+        await db.rollback()
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An error occurred while registering the user: {str(e)}")
+
 
 @router.post("/login", response_model=Token)
 async def login(
@@ -71,7 +87,7 @@ async def login(
         if not login_email or not login_password:
             raise HTTPException(status_code=400, detail="Email and password are required")
 
-        result = await db.execute(select(Users).filter(Users.email == login_email.strip()))
+        result = await db.execute(select(Users).filter(Users.email == login_email.strip().lower()))
         existing_user = result.scalars().first()
         if not existing_user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -84,7 +100,4 @@ async def login(
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"An error occurred while logging in: {str(e)}")                                                                                                                                               
-    
-
-
+        raise HTTPException(status_code=500, detail=f"An error occurred while logging in: {str(e)}")
